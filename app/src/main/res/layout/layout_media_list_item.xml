@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/cl_main"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    android:background="@android:color/white"
+    >
+
+  <com.google.android.exoplayer2.ui.PlayerView
+      app:surface_type="texture_view"
+      android:id="@+id/item_video_exoplayer"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:visibility="gone"
+      android:layout_centerInParent="true"
+      />
+
+  <ImageView
+      android:id="@+id/thumbnail"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:adjustViewBounds="true"
+      android:background="#fff"
+      android:layout_centerInParent="true"
+      android:scaleType="centerCrop"
+      android:visibility="visible"
+  />
+
+  <ImageView android:id="@id/exo_play_pause"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_gravity="center"
+      android:layout_centerInParent="true"
+      android:visibility="visible"
+      android:src="@drawable/exo_controls_play"
+      />
+
+  <ImageView
+      android:id="@+id/ivFullScreen"
+      android:layout_width="18dp"
+      android:layout_height="21dp"
+      android:backgroundTint="@color/black"
+      android:layout_alignParentRight="true"
+      android:background="@mipmap/ic_fullscreen"
+      android:layout_marginRight="50dp"
+
+      />
+
+</RelativeLayout>
