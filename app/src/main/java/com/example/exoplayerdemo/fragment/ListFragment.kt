@@ -35,6 +35,7 @@ class ListFragment : Fragment(),OnClickListener {
     private lateinit var mMediaItem: ArrayList<Media>
     private lateinit var rl_exo : RecyclerView
     private lateinit var mAdapter : VideoAdapter
+    lateinit var   thumbnailVideo: ImageView
 
     //    var videoURL = "https://media.geeksforgeeks.org/wp-content/uploads/20201217163353/Screenrecorder-2020-12-17-16-32-03-350.mp4"
    // var videoURL = "https://bitdash-a.akamaihd.net/content/MI201109210084_1/m3u8s/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.m3u8"
@@ -81,6 +82,8 @@ class ListFragment : Fragment(),OnClickListener {
 
             mAdapter = VideoAdapter(getData(), requireContext(), this)
             rl_exo.adapter = mAdapter
+
+
 
             /*
             exoPlayerView = v.findViewById(R.id.idExoPlayerVIew)
@@ -207,7 +210,21 @@ class ListFragment : Fragment(),OnClickListener {
         thumbnail: ImageView,
         play_pause: ImageView
     ) {
-
+//        rl_exo.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+//
+//            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+//                super.onScrollStateChanged(recyclerView, newState)
+//                if(newState==RecyclerView.SCROLL_STATE_IDLE)
+//                {
+//                    Log.e("TAG", "onScrollStateChanged")
+//                    if (thumbnail!=null) {
+//                        thumbnail.visibility = View.VISIBLE
+//                    }
+//
+//                }
+//
+//            }
+//        })
         if(playerView.player==null){
             playerView.player = exoPlayer
             var mediaDataSourceFactory = DefaultDataSourceFactory(

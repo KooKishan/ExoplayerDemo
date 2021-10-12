@@ -1,32 +1,28 @@
-package com.example.exoplayerdemo.fragment
+package com.example.exoplayerdemo
 
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.ActivityInfo
+import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.PowerManager
 import android.util.Log
-import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import androidx.core.content.ContextCompat
-import androidx.core.content.ContextCompat.getSystemService
-import androidx.fragment.app.Fragment
-import androidx.navigation.fragment.navArgs
-import com.example.exoplayerdemo.MainActivity
-import com.example.exoplayerdemo.R
-import com.google.android.exoplayer2.*
+import com.google.android.exoplayer2.ExoPlayer
+import com.google.android.exoplayer2.MediaItem
+import com.google.android.exoplayer2.Player
+import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.source.hls.HlsMediaSource
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
 import com.google.android.exoplayer2.ui.PlayerView
-import com.google.android.exoplayer2.upstream.*
+import com.google.android.exoplayer2.upstream.BandwidthMeter
+import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter
+import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import com.google.android.exoplayer2.util.Util
-import kotlin.math.roundToInt
 
-
-class FullScreenPlayerFragment : Fragment() {
-    // TODO: Rename and change types of parameters
+class FullScreenActivity : AppCompatActivity() {
     private lateinit var exoPlayerView: PlayerView
     private var exoPlayer: SimpleExoPlayer? = null
     private lateinit var iVFullScreen: ImageView
@@ -34,32 +30,46 @@ class FullScreenPlayerFragment : Fragment() {
     private lateinit var pm : PowerManager
     private lateinit var wl : PowerManager.WakeLock
     private var fullscreen : Boolean = false
+
+
     @SuppressLint("InvalidWakeLockTag")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        pm = requireContext().getSystemService(Context.POWER_SERVICE) as PowerManager
+        setContentView(R.layout.activity_full_screen)
+        pm = getSystemService(Context.POWER_SERVICE) as PowerManager
         wl = pm!!.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK,"My Tag")as PowerManager.WakeLock
+      var  urlVideo = intent.getStringExtra("URL")
+        urlVideo?.let { initView(it) }
     }
-
-    override fun onCreateView(
-            inflater: LayoutInflater, container: ViewGroup?,
-            savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        rootView =inflater.inflate(R.layout.fragment_full_screen_player, container, false)
-        initView(rootView);
-        return rootView
-    }
-
-    private fun initView(v: View){
+    private fun initView(urlVideo:String){
         try {
-            exoPlayerView = v.findViewById(R.id.idExoPlayerVIew);
-            iVFullScreen = v.findViewById(R.id.ivFullScreen);
+            exoPlayerView = findViewById(R.id.idExoPlayerVIew);
+            iVFullScreen = findViewById(R.id.ivFullScreen);
 
             iVFullScreen.setOnClickListener {
                 fullscreen()
             }
-            exoPlayer = (activity as? MainActivity)?.getupPlayer()
+
+            val bandwidthMeter: BandwidthMeter = DefaultBandwidthMeter()
+            val trackSelector = DefaultTrackSelector(this).apply {
+                setParameters(buildUponParameters().setMaxVideoSizeSd())
+            }
+            exoPlayer = SimpleExoPlayer.Builder(this)
+                .setTrackSelector(trackSelector)
+                .setBandwidthMeter(bandwidthMeter)
+                .build()
+
+            var mediaDataSourceFactory = DefaultDataSourceFactory(
+                this, Util.getUserAgent(this, "RecyclerView VideoPlayer")
+            )
+            val mediaUrl: String = urlVideo!!
+
+            val hlsMediaSource: HlsMediaSource = HlsMediaSource.Factory(mediaDataSourceFactory)
+                .createMediaSource(MediaItem.fromUri(mediaUrl))
+            exoPlayer!!.setMediaSource(hlsMediaSource)
+            exoPlayerView.player = exoPlayer
+            exoPlayer!!.prepare()
+            exoPlayer!!.playWhenReady = true
             exoPlayer!!.addListener(object : Player.Listener {
 
                 override fun onPlaybackStateChanged(playbackState: Int) {
@@ -80,34 +90,16 @@ class FullScreenPlayerFragment : Fragment() {
                 }
 
             })
-            exoPlayerView.player = exoPlayer
-            exoPlayer!!.playWhenReady = true
+
         } catch (e: Exception) {
             Log.e("TAG", "Error : $e")
         }
     }
 
-
-
-    override fun onStop() {
-        super.onStop()
-        exoPlayer!!.playWhenReady = false
-    }
-
-
-
-
-
-    override fun onDestroy() {
-        super.onDestroy()
-        requireActivity().getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE)
-        requireActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
-    }
-
     private fun fullscreen(){
         if (fullscreen) {
-            requireActivity().getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE)
-            requireActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+           getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE)
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
             val params = exoPlayerView.getLayoutParams()
             params.width = ViewGroup.LayoutParams.MATCH_PARENT
             params.height =  ViewGroup.LayoutParams.MATCH_PARENT
@@ -115,9 +107,9 @@ class FullScreenPlayerFragment : Fragment() {
             fullscreen = false
 
         } else {
-            requireActivity().getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN
+          getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN
                     or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION)
-            requireActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)
+          setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)
             val params = exoPlayerView.getLayoutParams()
             params.width = ViewGroup.LayoutParams.MATCH_PARENT
             params.height = ViewGroup.LayoutParams.MATCH_PARENT
@@ -126,5 +118,18 @@ class FullScreenPlayerFragment : Fragment() {
 
         }
     }
+
+    override fun onStop() {
+        super.onStop()
+        exoPlayer!!.playWhenReady = false
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+       getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE)
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+    }
+
+
 
 }

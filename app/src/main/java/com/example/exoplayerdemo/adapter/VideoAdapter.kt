@@ -19,7 +19,8 @@ import com.google.android.exoplayer2.ui.PlayerView
 
 import java.util.*
 
-class VideoAdapter(mediaObjects: ArrayList<Media>, context: Context, onClickListener: OnClickListener) : RecyclerView.Adapter<RecyclerView.ViewHolder?>() {
+class VideoAdapter(mediaObjects: ArrayList<Media>, context: Context, onClickListener: OnClickListener) :
+    RecyclerView.Adapter<RecyclerView.ViewHolder?>() {
     private val mediaObjects: ArrayList<Media> = mediaObjects
     private val context: Context = context
     private val onClickListener: OnClickListener = onClickListener
